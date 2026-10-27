@@ -5,7 +5,6 @@ using VRC.SDK3.Avatars.Components;
 
 namespace MururuBlinkLipSync.Editor.Tests
 {
-    // TEST_CASES.md A. 対象Avatarの選択
     internal sealed class TargetSelectionTests : MururuAvatarTestBase
     {
         [Test]

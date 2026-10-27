@@ -8,7 +8,6 @@ using VRC.SDK3.Avatars.Components;
 
 namespace MururuBlinkLipSync.Editor.Tests
 {
-    // TEST_CASES.md H. ビルド
     internal sealed class BuildTests : MururuAvatarTestBase
     {
         [Test]

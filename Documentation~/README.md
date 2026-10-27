@@ -7,7 +7,6 @@
 | [website/](website/) | 公開マニュアル・画像（VitePress） |
 | [booth/](booth/) | 公開用の商品画像 |
 | [maintenance/MOUTH_RETURN.md](maintenance/MOUTH_RETURN.md) | 口復帰の仕組み・対応範囲 |
-| [maintenance/TEST_CASES.md](maintenance/TEST_CASES.md) | 自動テストの項目 |
 | [maintenance/TEST_ENVIRONMENT.md](maintenance/TEST_ENVIRONMENT.md) | テスト環境に必要なアセットと実行方法 |
 | [maintenance/PUBLICATION.md](maintenance/PUBLICATION.md) | 公開ファイルの管理・個人情報の混入防止 |
 | [maintenance/WEBSITE.md](maintenance/WEBSITE.md) | GitHub Pages配信・IndexNow・サイト監視 |

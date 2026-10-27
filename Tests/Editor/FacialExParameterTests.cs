@@ -7,7 +7,6 @@ using VRC.SDK3.Avatars.ScriptableObjects;
 
 namespace MururuBlinkLipSync.Editor.Tests
 {
-    // TEST_CASES.md D. Facial EXパラメータ
     internal sealed class FacialExParameterTests : MururuAvatarTestBase
     {
         [Test]
