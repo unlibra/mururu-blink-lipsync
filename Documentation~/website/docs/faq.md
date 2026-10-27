@@ -15,7 +15,7 @@ description: インストールボタンが押せない、VRChatでリップシ�
 lilToonは[こちら](https://lilxyzw.github.io/lilToon/ja_JP/)です。
 
 ::: tip
-インストールしたあとVCCのManage Packagesでプロジェクトに追加するのを忘れないようにしてください。
+lilToonは、VCCのManage Packagesから使用するプロジェクトに追加してください。
 :::
 
 ## Unityでリップシンク用の口が表示されない
