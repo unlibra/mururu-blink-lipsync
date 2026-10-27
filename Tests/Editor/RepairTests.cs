@@ -6,7 +6,6 @@ using VRC.SDK3.Avatars.Components;
 
 namespace MururuBlinkLipSync.Editor.Tests
 {
-    // TEST_CASES.md F. 修復 / 新しい方式に更新
     internal sealed class RepairTests : MururuAvatarTestBase
     {
         [Test]

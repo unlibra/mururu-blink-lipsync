@@ -10,7 +10,6 @@ using VRC.SDK3.Avatars.Components;
 
 namespace MururuBlinkLipSync.Editor.Tests
 {
-    // TEST_CASES.md E. 設定の変更を適用
     internal sealed class ApplySettingsTests : MururuAvatarTestBase
     {
         [Test]

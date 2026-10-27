@@ -55,7 +55,7 @@ FaceEmoの表情を、確認していない手の割当と組み合わせて反�
 - native試験には、目のみ・部分的な口指定・下位の書込有無、Direct tree、同期・順序・ウェイト・マスクを含みます。実MA/NDMFビルドで最終復帰曲線、再処理後の保持、再ビルドの非累積、元入力不変を検証しています。
 - 追加シェイプ・Animator評価の負荷はあり、実機CPU/GPU時間・FPSは未測定です。
 
-回帰項目・実行方法は[TEST_CASES.md](TEST_CASES.md)、試験コードは[Tests/Editor](../../Tests/Editor/)を参照してください。
+テストの実行方法は[TEST_ENVIRONMENT.md](TEST_ENVIRONMENT.md)、試験コードは[Tests/Editor](../../Tests/Editor/)を参照してください。
 
 ## 配布
 

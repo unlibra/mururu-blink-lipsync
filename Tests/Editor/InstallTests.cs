@@ -8,7 +8,6 @@ using VRC.SDKBase;
 
 namespace MururuBlinkLipSync.Editor.Tests
 {
-    // TEST_CASES.md B. インストール / C. 口形状の検証
     internal sealed class InstallTests : MururuAvatarTestBase
     {
         [Test]

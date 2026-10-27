@@ -13,7 +13,6 @@ using Object = UnityEngine.Object;
 
 namespace MururuBlinkLipSync.Editor.Tests
 {
-    // TEST_CASES.md G. 削除
     internal sealed class RemoveTests : MururuAvatarTestBase
     {
         [Test]
