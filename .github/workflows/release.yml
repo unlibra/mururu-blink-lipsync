@@ -1,0 +1,86 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Test and inspect publication
+        run: |
+          node --test Tools~/privacy.test.mjs Tools~/website.test.mjs Tools~/release.test.mjs
+          node Tools~/privacy.mjs check-commit HEAD
+      - name: Build committed release
+        run: node Tools~/release.mjs build
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-${{ matrix.os }}
+          path: |
+            dist~/*.unitypackage
+            dist~/release-manifest.json
+            dist~/release-notes.md
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+
+  publish:
+    if: github.event_name == 'push' && github.ref_type == 'tag' && github.repository == 'unlibra/mururu-blink-lipsync'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: release-*
+          path: dist~/ci
+      - name: Verify tag and both platform artifacts
+        id: verify
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          SOURCE_COMMIT="$(git rev-parse HEAD)"
+          test "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" = "$SOURCE_COMMIT"
+          git merge-base --is-ancestor "$SOURCE_COMMIT" origin/main
+          node Tools~/release.mjs verify dist~/ci/release-ubuntu-latest dist~/ci/release-windows-latest "$RELEASE_TAG" "$SOURCE_COMMIT"
+      - name: Publish the verified unitypackage
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ github.ref_name }}
+          PACKAGE_PATH: ${{ steps.verify.outputs.package_path }}
+          NOTES_PATH: ${{ steps.verify.outputs.notes_path }}
+        run: |
+          gh release create "$RELEASE_TAG" "$PACKAGE_PATH" --verify-tag --title "$RELEASE_TAG" --notes-file "$NOTES_PATH"

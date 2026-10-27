@@ -1,0 +1,29 @@
+{
+    "name": "MururuBlinkLipSync.Editor.Tests",
+    "rootNamespace": "MururuBlinkLipSync.Editor.Tests",
+    "references": [
+        "MururuBlinkLipSync.Editor",
+        "MururuBlinkLipSync.Runtime",
+        "nadena.dev.modular-avatar.core",
+        "nadena.dev.ndmf",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll",
+        "VRCSDKBase.dll",
+        "VRCSDK3A.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

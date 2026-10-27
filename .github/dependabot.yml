@@ -1,0 +1,29 @@
+# Version updates (read from the default branch, so they start once this file
+# is on main).
+#
+# - Weekly, with minor and patch updates in one pull request; each major
+#   update gets its own pull request.
+# - cooldown: a release is proposed only once it is 7 days old, so a broken or
+#   hijacked release is usually pulled before it reaches here.
+version: 2
+updates:
+  # The VitePress manual
+  - package-ecosystem: npm
+    directory: /Documentation~/website
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]

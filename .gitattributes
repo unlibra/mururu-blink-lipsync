@@ -1,0 +1,5 @@
+# Image data is cleaned when staged; setup is installed per clone.
+*.png filter=public-image -text
+*.webp filter=public-image -text
+.githooks/* text eol=lf
+Tools~/*.mjs text eol=lf

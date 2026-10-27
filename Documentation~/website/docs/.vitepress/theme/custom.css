@@ -1,0 +1,30 @@
+/*
+ * Shared look for the unlibra documentation sites: keep the default layout
+ * and override only fonts and brand colors. The brand colors are not decided
+ * yet and still use the VitePress defaults.
+ *
+ * One web font each (imported in theme/index.ts), then the reader's own fonts.
+ */
+:root {
+  --vp-font-family-base: "Noto Sans JP Variable", sans-serif;
+  --vp-font-family-mono: "Geist Mono Variable", ui-monospace, monospace;
+}
+
+/*
+ * On wide screens the default theme centers a 90rem layout, which moves the
+ * sidebar away from the left edge. Use the full width so the sidebar stays at
+ * the left edge; the doc column keeps its own max width. The doubled
+ * selector outranks the theme's own :root rule, which loads later.
+ */
+:root:root {
+  --vp-layout-max-width: 100%;
+}
+
+/*
+ * The nav bar subtracts 4rem from that width and centers the rest, which
+ * would indent the site title past the sidebar items. Let it fill the bar.
+ */
+.VPNavBar .container {
+  max-width: none !important;
+}
+
