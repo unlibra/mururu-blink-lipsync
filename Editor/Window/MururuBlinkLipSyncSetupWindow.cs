@@ -1,5 +1,5 @@
 // Mururu Blink & LipSync
-// v1.1.1 / 2026-10-26
+// v1.1.2 / 2026-10-28
 //
 // Requires:
 // - VRChat SDK
@@ -51,7 +51,7 @@ namespace MururuBlinkLipSync.Editor
 // - GeneratedAssets:    package paths and ownership / deletion of generated assets
 public partial class MururuBlinkLipSyncSetupWindow : EditorWindow
 {
-    private const string ToolVersion = "1.1.1";
+    private const string ToolVersion = "1.1.2";
 
     private const string DocumentationUrl = "https://docs.unlibra.com/mururu-blink-lipsync/";
 
