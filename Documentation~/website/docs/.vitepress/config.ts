@@ -56,8 +56,13 @@ export default defineConfig({
     // alt: the brand, read before the site title in the link.
     logo: { src: 'https://docs.unlibra.com/brand/symbol.svg', alt: 'unlibra' },
 
+    socialLinks: [
+      { icon: 'github', link: 'https://github.com/unlibra/mururu-blink-lipsync', ariaLabel: 'GitHubリポジトリ' }
+    ],
+
     nav: [
       { text: 'マニュアル', link: '/installation' },
+      { text: '応援について', link: '/support' },
       { text: 'BOOTH', link: 'https://unlibra.booth.pm/items/9056145' }
     ],
 
@@ -77,6 +82,7 @@ export default defineConfig({
           { text: '対応環境', link: '/requirements' },
           { text: 'ライセンス', link: '/license' },
           { text: '第三者ライセンス', link: '/third-party' },
+          { text: '応援について', link: '/support' },
           { text: 'お問い合わせ', link: '/contact' }
         ]
       }
