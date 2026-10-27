@@ -22,13 +22,17 @@ mainとPRでも検査・生成しますが、Release公開は行いません。�
 - テストは別実装のtarでの展開、LF/CRLFのcheckoutでの同一性、混入・不完全な入力・改ざん・タグ不一致の拒否を含みます。
 - このCIはUnityの実行テストを代替しません。製品コードの変更に必要なUnity検証は [TEST_ENVIRONMENT.md](TEST_ENVIRONMENT.md) に従います。
 
-CIの生成先は `dist~/` です。manifestと生成したRelease本文はActionsの内部成果物として保存し、公開Releaseに添付するファイルはunitypackageだけです。必要な調査時は、変更のないコミット済みcheckoutで同じ処理を実行できます。
+CIの生成先は `dist~/` です。manifestと生成したRelease本文はActionsの内部成果物として保存し、公開Releaseにはunitypackage、VPM ZIP、package.jsonを添付します。VPM ZIPはルートにpackage.json・Editor・Runtime・文書とmetaを含み、テスト・生成済みアセットを含みません。必要な調査時は、変更のないコミット済みcheckoutで同じ処理を実行できます。
 
 ```sh
 node Tools~/release.mjs build
-node --test Tools~/release.test.mjs
+node --test Tools~/release.test.mjs Tools~/vpm.test.mjs
 ```
 
 ## VCC
 
-VCC対応は初回公開とサイト切り替えの完了後に進めます。現在のunitypackage配布と混同せず、生成先・既存アセットの移行と実Unity環境での検証を行います。
+Package IDは com.unlibra.mururu-blink-lipsync。package.json・ToolVersion・CHANGELOG・タグの版番号を揃えます。VPM ZIPの内容を元コミットと照合し、Windows/Linuxで一致させてから公開します。
+
+共通一覧は [unlibra/vpm](https://github.com/unlibra/vpm) で管理します。製品Releaseの公開だけでは一覧は更新されません。公開済みの版を一覧リポジトリのimport-release.mjsで取り込み、ZIPのSHA-256と版ごとのJSONをレビューしてから配信します。VPM版の公開後は旧版ZIP・一覧エントリを削除しません。
+
+旧unitypackageのフォルダには利用者のGeneratedがあるため、legacyFolders/legacyFilesによる自動削除は有効にしていません。配布形式の切り替え手順は利用者向けインストールページに記載します。

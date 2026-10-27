@@ -51,11 +51,11 @@ namespace MururuBlinkLipSync.Editor
 // - GeneratedAssets:    package paths and ownership / deletion of generated assets
 public partial class MururuBlinkLipSyncSetupWindow : EditorWindow
 {
-    private const string ToolVersion = "1.1.2";
+    private const string ToolVersion = "1.2.0";
 
     private const string DocumentationUrl = "https://docs.unlibra.com/mururu-blink-lipsync/";
 
-    internal const int InstallSchemaVersion = 4;
+    internal const int InstallSchemaVersion = 5;
 
     // Button labels, also quoted by messages that tell the user what to press.
     private const string InstallButtonLabel = "インストール";
@@ -203,16 +203,38 @@ public partial class MururuBlinkLipSyncSetupWindow : EditorWindow
 
     private const float MouthDeltaThreshold = 0.005f;
 
-    // Generated assets live beside the installed package. The package root is
-    // resolved from the Editor asmdef at operation time so moving/renaming the
-    // whole MururuBlinkLipSync folder under Assets does not split generated files.
-    internal static string OutputFolder =>
-        (operationPackageRoot ?? GetPackageRoot()) + "/Generated";
-
-    // Per-operation caches. Every operation entry point must go through
-    // RunSafely, which fills operationPackageRoot before any scene or asset is
-    // modified and clears both afterwards so the next operation starts fresh.
+    // Both distribution formats write persistent avatar assets to the same
+    // project-owned storage, independently of the product code location.
+    internal static string OutputFolder => operationOutputFolder ?? MururuGeneratedStorage.ResolveRoot(false);
     private static string operationPackageRoot;
+    private static string operationOutputFolder;
+    private static MururuGeneratedAssetSet operationAssetSet;
+    private static MururuBlinkLipSyncInstallRecord operationRecord;
+    private static readonly List<string> operationCreatedAssetGuids = new List<string>();
+
+    private static void UseRecordStorage(MururuBlinkLipSyncInstallRecord record)
+    {
+        operationRecord = record;
+        operationAssetSet = record.generatedAssetSet as MururuGeneratedAssetSet;
+        if (record.generatedAssetSet != null && operationAssetSet == null)
+            throw new InvalidOperationException("導入済みアセットの管理情報の型が一致しません。");
+        if (operationAssetSet == null && record.installSchemaVersion >= 5)
+            throw new InvalidOperationException("導入済みアセットの管理情報が見つかりません。バックアップから復元してください。");
+        operationOutputFolder = operationAssetSet != null ? MururuGeneratedStorage.Folder(operationAssetSet) : null;
+    }
+
+    private static void PrepareStorageForWrite(MururuBlinkLipSyncInstallRecord record)
+    {
+        bool shared = operationAssetSet != null && IsAssetReferencedElsewhere(record, AssetDatabase.GetAssetPath(operationAssetSet));
+        if (operationAssetSet == null || shared)
+        {
+            operationAssetSet = MururuGeneratedStorage.CreateSet();
+            operationCreatedAssetGuids.Add(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(operationAssetSet)));
+            operationOutputFolder = MururuGeneratedStorage.Folder(operationAssetSet);
+        }
+        operationRecord = record;
+        if (record != null) record.generatedAssetSet = operationAssetSet;
+    }
 
     // Generated paths referenced from scene files that are not loaded, or from
     // Prefab assets. Duplicated avatars in backup scenes / prefabs still use

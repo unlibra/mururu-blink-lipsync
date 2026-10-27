@@ -53,9 +53,10 @@ namespace MururuBlinkLipSync.Editor.Tests
             legacyBody.name = "Body_MururuSE_Generated";
             string legacyPath =
                 AssetDatabase.GenerateUniqueAssetPath(
-                    $"{MururuBlinkLipSyncSetupWindow.OutputFolder}/Body_MururuSE_Generated.asset");
+                    $"{MururuGeneratedStorage.Folder((MururuGeneratedAssetSet)record.generatedAssetSet)}/Body_MururuSE_Generated.asset");
             AssetDatabase.CreateAsset(legacyBody, legacyPath);
             record.generatedAssetPaths.Add(legacyPath);
+            ((MururuGeneratedAssetSet)record.generatedAssetSet).assets.Add(legacyBody);
             record.installSchemaVersion = MururuBlinkLipSyncSetupWindow.InstallSchemaVersion - 1;
             body.sharedMesh = legacyBody;
             TrackGeneratedPaths(record);

@@ -53,6 +53,10 @@ namespace MururuBlinkLipSync
         [HideInInspector]
         public List<string> generatedAssetPaths = new List<string>();
 
+        // Object avoids an Editor assembly reference in the runtime assembly.
+        [HideInInspector]
+        public Object generatedAssetSet;
+
         [HideInInspector]
         public string installedVersion;
         [HideInInspector]

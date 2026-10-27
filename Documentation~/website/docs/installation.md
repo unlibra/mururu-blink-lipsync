@@ -1,5 +1,5 @@
 ---
-description: Mururu Blink & LipSyncのインストール手順。Modular Avatarの導入、unitypackageのインポート、ツールのウィンドウからムルルにまばたきとリップシンクを追加するまで。
+description: Mururu Blink & LipSyncのインストール手順。Modular Avatarの導入、VCCまたはunitypackageからの追加、ツールのウィンドウからムルルにまばたきとリップシンクを追加するまで。
 ---
 
 # インストール
@@ -19,9 +19,23 @@ lilToonは[こちら](https://lilxyzw.github.io/lilToon/ja_JP/)です。
 MAとlilToonは、VCCのManage Packagesから使用するプロジェクトに追加してください。
 :::
 
-## 2. unitypackage をインポートする
+## 2. ツールをプロジェクトへ追加する
 
-ダウンロードした unitypackage をUnityのProjectウィンドウへドラッグ＆ドロップし、すべて選択したままImportします。
+VCC版とunitypackage版のどちらか一方を使います。
+
+### VCCから追加する
+
+1. [unlibraの配布一覧](https://docs.unlibra.com/vpm/)の「VCCに追加」を押して、リポジトリを登録します。
+2. VCCで使用するプロジェクトの **Manage Packages** を開き、**Mururu Blink & LipSync** を追加します。
+3. Unityでプロジェクトを開きます。
+
+リポジトリの登録だけでは、プロジェクトへツールは追加されません。
+
+既にunitypackage版を入れている場合は、先に[配布形式の切り替え](#配布形式の切り替え)を確認してください。
+
+### unitypackageから追加する
+
+BOOTHまたはGitHub ReleasesからダウンロードしたunitypackageをUnityのProjectウィンドウへドラッグ＆ドロップし、すべて選択したままImportします。
 
 ![Import Unity Package の画面](/images/1-2.webp)
 
@@ -46,5 +60,15 @@ Hierarchyでシーンに置いたムルルを選択すると、「対象アバ�
 :::
 
 ::: warning
-インストールすると、ツールのフォルダ内の `Generated` に生成ファイルが作られます。手動で削除したり、自作のAnimator Controllerなどから使ったりしないでください。修復やアンインストールのときに、置き換えや削除をすることがあります。
+インストールすると、`Assets/ZZZ_MururuBlinkLipSyncAssets/` にアバターが使用するメッシュやアニメーション等が自動で作られます。保存先の選択は不要です。このフォルダはビルド時だけのキャッシュではありません。導入したアバターがある間は削除しないでください。
 :::
+
+## 配布形式の切り替え
+
+VCC版とunitypackage版のコードを同時に置くと、重複してコンパイルできなくなります。切り替える前にUnityプロジェクトをバックアップしてください。
+
+unitypackage版からVCC版へ切り替える場合は、Sceneを保存してUnityを閉じ、旧版に同梱されたEditor/Runtimeのコードを.metaと一緒にAssets外へ退避してから、VCCのManage Packagesで本ツールを追加します。旧版のGeneratedや本ツールの保存先、Scene、Prefabは残してください。旧コードを退避した状態でSceneを開いて保存しないでください。
+
+新しいコードで開いた後、導入済みのアバターをツールの更新操作で更新します。旧Generatedのファイルは自動削除しません。ほかのSceneやPrefabが使っている可能性があるためです。製品コードの退避時は、利用者が追加した別のコード・ファイルまで削除しないでください。
+
+VCC版からunitypackage版へ切り替える場合も、先にVCCで本ツールのパッケージを削除し、その後unitypackageをインポートします。本ツールのパッケージをVCCから削除する操作と、アバターから機能を削除する操作は別です。アバターから機能を外す場合は、コードを削除する前にツールの削除操作を行ってください。

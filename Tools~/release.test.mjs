@@ -36,6 +36,7 @@ function fixture(t) {
     'NOTICE.txt': 'Required Notice: Copyright (c) 2026 unlibra\n',
   };
   for (const [name, bytes] of Object.entries(sources)) write(name, bytes);
+  write('package.json', JSON.stringify({ ...{"name":"com.unlibra.mururu-blink-lipsync","displayName":"Mururu Blink & LipSync","version":"1.2.0","unity":"2022.3","description":"ムルル向けのまばたき・リップシンク導入ツール。","author":{"name":"unlibra","email":"63234154+unlibra@users.noreply.github.com","url":"https://unlibra.com"},"license":"SEE LICENSE IN LICENSE.txt","documentationUrl":"https://docs.unlibra.com/mururu-blink-lipsync/","changelogUrl":"https://github.com/unlibra/mururu-blink-lipsync/blob/main/CHANGELOG.md","url":"https://github.com/unlibra/mururu-blink-lipsync/releases/download/v1.2.0/com.unlibra.mururu-blink-lipsync-1.2.0.zip","vpmDependencies":{"com.vrchat.avatars":">=3.10.5 <4.0.0","nadena.dev.modular-avatar":">=1.18.7 <2.0.0","nadena.dev.ndmf":">=1.14.8 <2.0.0"}}, version: '1.2.3', url: 'https://github.com/unlibra/mururu-blink-lipsync/releases/download/v1.2.3/com.unlibra.mururu-blink-lipsync-1.2.3.zip' })+'\n');
   for (const name of ['Editor', 'Editor/Window', 'Runtime', ...Object.keys(sources)]) {
     const guid = createHash('md5').update(name).digest('hex');
     write(`${name}.meta`, `fileFormatVersion: 2\nguid: ${guid}\n${name.includes('.') ? '' : 'folderAsset: yes\n'}`);
@@ -77,7 +78,13 @@ test('native tar independently extracts the Unity layout, original bytes, GUIDs 
   assert.equal(fs.readdirSync(extracted).length, snapshot.assetCount + 2);
   for (const file of ['LICENSE.txt', 'NOTICE.txt']) assert.ok(paths.includes(`Assets/unlibra/MururuBlinkLipSync/${file}`));
   assert.ok(paths.every(name => !/\/(?:Tests|Generated|Documentation~)(?:\/|$)/.test(name)));
-  assert.ok(fs.readdirSync(path.join(root, 'dist~')).every(name => !name.endsWith('.zip')));
+  const zipPath = path.join(root, 'dist~', manifest.files[1].name);
+  const zipEntries = execFileSync('tar', ['-tf', zipPath]).toString().trim().split(/\r?\n/);
+  assert.ok(zipEntries.includes('package.json') && zipEntries.includes('LICENSE.txt') && zipEntries.includes('NOTICE.txt'));
+  assert.ok(zipEntries.every(name => !/^(?:Assets|Packages|Tests|Generated|Documentation~)\//.test(name)));
+  const zipDir = path.join(root, 'dist~/vpm-extracted'); fs.mkdirSync(zipDir);
+  execFileSync('tar', ['-xf', zipPath, '-C', zipDir]);
+  for (const [name, bytes] of snapshot.vpmFiles) assert.deepEqual(fs.readFileSync(path.join(zipDir, name)), bytes);
   const note = fs.readFileSync(path.join(root, 'dist~/release-notes.md'), 'utf8');
   assert.ok(note.includes('Test fix.') && !note.includes('Old fix.'));
   assert.equal(manifest.sourceDirty, false);
@@ -121,7 +128,7 @@ test('publication requires matching tag, commit, notes, manifests, content and b
   const first = path.join(root, 'dist~/linux'), second = path.join(root, 'dist~/windows');
   for (const dir of [first, second]) {
     fs.mkdirSync(dir);
-    for (const name of [manifest.files[0].name, 'release-manifest.json', 'release-notes.md']) fs.copyFileSync(path.join(root, 'dist~', name), path.join(dir, name));
+    for (const name of [...manifest.files.map(f => f.name), 'release-manifest.json', 'release-notes.md']) fs.copyFileSync(path.join(root, 'dist~', name), path.join(dir, name));
   }
   assert.ok(verifyBuilds(root, [first, second], 'v1.2.3', manifest.sourceCommit).packagePath.endsWith('.unitypackage'));
   assert.throws(() => verifyBuilds(root, [first, second], 'v9.9.9', manifest.sourceCommit), /Tag does not match/);
