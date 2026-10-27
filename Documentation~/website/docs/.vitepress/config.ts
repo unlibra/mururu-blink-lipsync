@@ -62,7 +62,7 @@ export default defineConfig({
 
     nav: [
       { text: 'マニュアル', link: '/installation' },
-      { text: '応援について', link: '/support' },
+      { text: '寄付', link: '/support' },
       { text: 'BOOTH', link: 'https://unlibra.booth.pm/items/9056145' }
     ],
 

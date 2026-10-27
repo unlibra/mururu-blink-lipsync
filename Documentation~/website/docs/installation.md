@@ -16,7 +16,7 @@ lilToonは[こちら](https://lilxyzw.github.io/lilToon/ja_JP/)です。
 対応するバージョンは[対応環境](./requirements)を参照してください。
 
 ::: tip
-インストールしたあとVCCのManage Packagesでプロジェクトに追加するのを忘れないようにしてください。
+MAとlilToonは、VCCのManage Packagesから使用するプロジェクトに追加してください。
 :::
 
 ## 2. unitypackage をインポートする
