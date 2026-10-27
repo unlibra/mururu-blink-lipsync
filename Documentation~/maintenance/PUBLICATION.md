@@ -87,5 +87,5 @@ node Tools~/privacy.mjs export dist~/public-source
 - [x] 配布形式をunitypackage単体に決定。LICENSE.txtとNOTICE.txtを同梱し、ZIPは生成しない。
 - [x] BOOTHでのunitypackage配布を確定。VCC対応は公開とサイト切り替えの完了後に進める。
 - [x] CIで生成したunitypackageをGitHub Releasesへ公開し、そのファイルをBOOTHへアップロードする運用に決定。Node.jsへ生成処理を移植し、Windows用の配布スクリプトを廃止。
-- [ ] 新しい履歴の全ファイル・コミットを最終監査。
-- [ ] 公開判断後にpushし、実際の配信を確認。
+- [x] 新しい履歴の全ファイル・コミットを最終監査。旧非公開履歴を引き継がず、公開用175ファイルと作者情報を確認。
+- [x] 公開判断後にpushし、実際の配信を確認。GitHub Releases v1.1.1、9ページの直接配信、IndexNow、本番監視が成功。旧共有サイトの成果物と専用デプロイ鍵を撤去。
