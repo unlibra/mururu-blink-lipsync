@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- Prefab Variantの導入・設定変更・アンインストールに関するFAQ
+- Prefab Variantの継承・保存・削除に関する自動テスト
+
+### Changed
+
+- インストール完了・生成ファイル保持・削除失敗のログを整理
+
 ## [1.2.0] - 2026-10-28
 
 ### Added

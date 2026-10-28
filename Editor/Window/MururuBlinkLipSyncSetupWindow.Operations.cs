@@ -470,10 +470,8 @@ public partial class MururuBlinkLipSyncSetupWindow
             EditorGUIUtility.PingObject(root);
 
             Debug.Log(
-                "[MururuBlinkLipSync] " + ToolVersion + " install complete. Body Mesh was not replaced.\n" +
-                $"Body Mesh: {bodyRenderer.sharedMesh.name}\n" +
-                $"LipSync Mesh: {seMeshPath}\n" +
-                $"Generated assets: {record.generatedAssetPaths.Count}");
+                "[MururuBlinkLipSync] " + ToolVersion + " インストールが完了しました。",
+                avatarDescriptor);
         }
         catch
         {
@@ -488,7 +486,7 @@ public partial class MururuBlinkLipSyncSetupWindow
                 catch (Exception rollbackEx)
                 {
                     Debug.LogError(
-                        "[MururuBlinkLipSync] Install rollback failed:\n" +
+                        "[MururuBlinkLipSync] インストール失敗後の自動復元に失敗しました。Sceneと生成ファイルの状態を確認してください:\n" +
                         rollbackEx);
                 }
             }
@@ -875,7 +873,7 @@ public partial class MururuBlinkLipSyncSetupWindow
                     if (!AssetDatabase.DeleteAsset(path))
                     {
                         Debug.LogWarning(
-                            "[MururuBlinkLipSync] Generated asset could not be deleted: " +
+                            "[MururuBlinkLipSync] 生成ファイルを削除できませんでした。ファイルの使用状態や書き込み権限を確認してください: " +
                             path);
                     }
                 }
@@ -974,7 +972,7 @@ public partial class MururuBlinkLipSyncSetupWindow
         if (outsideAssetPaths.Count > 0)
         {
             Debug.Log(
-                "[MururuBlinkLipSync] Listed assets outside the Generated folder were not deleted:\n" +
+                "[MururuBlinkLipSync] 管理対象外のため、次のファイルは削除しませんでした:\n" +
                 string.Join("\n", outsideAssetPaths));
         }
 
@@ -992,7 +990,7 @@ public partial class MururuBlinkLipSyncSetupWindow
         if (keptAssetPaths.Count > 0)
         {
             Debug.Log(
-                "[MururuBlinkLipSync] Generated assets kept because another avatar, scene or prefab still uses them:\n" +
+                "[MururuBlinkLipSync] ほかのアバター・Scene・Prefabから参照されているため、次の生成ファイルを保持しました:\n" +
                 string.Join("\n", keptAssetPaths));
         }
 
@@ -1248,7 +1246,7 @@ public partial class MururuBlinkLipSyncSetupWindow
         catch (Exception ex)
         {
             Debug.LogWarning(
-                "[MururuBlinkLipSync] Could not restore source FBX Read/Write setting:\n" +
+                "[MururuBlinkLipSync] FBXのRead/Write設定を元に戻せませんでした。対象FBXのImport Settingsを確認してください:\n" +
                 ex);
         }
     }

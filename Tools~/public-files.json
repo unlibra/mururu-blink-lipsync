@@ -171,6 +171,8 @@
     "Tests/Editor/PrivateAssets/FaceEmoRealReturnTests.cs.meta",
     "Tests/Editor/PrivateAssets/PackageMouthProbeTests.cs",
     "Tests/Editor/PrivateAssets/PackageMouthProbeTests.cs.meta",
+    "Tests/Editor/PrefabVariantTests.cs",
+    "Tests/Editor/PrefabVariantTests.cs.meta",
     "Tests/Editor/RemoveTests.cs",
     "Tests/Editor/RemoveTests.cs.meta",
     "Tests/Editor/RepairTests.cs",
