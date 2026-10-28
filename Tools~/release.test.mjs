@@ -48,7 +48,7 @@ function fixture(t) {
   return { root, git, write, commit };
 }
 
-test('native tar independently extracts the Unity layout, original bytes, GUIDs and legal files', t => {
+test('native archive readers independently extract both package layouts, bytes, GUIDs and legal files', t => {
   const { root } = fixture(t);
   const snapshot = releaseSnapshot(root);
   const manifest = buildRelease(root);
@@ -79,11 +79,14 @@ test('native tar independently extracts the Unity layout, original bytes, GUIDs 
   for (const file of ['LICENSE.txt', 'NOTICE.txt']) assert.ok(paths.includes(`Assets/unlibra/MururuBlinkLipSync/${file}`));
   assert.ok(paths.every(name => !/\/(?:Tests|Generated|Documentation~)(?:\/|$)/.test(name)));
   const zipPath = path.join(root, 'dist~', manifest.files[1].name);
-  const zipEntries = execFileSync('tar', ['-tf', zipPath]).toString().trim().split(/\r?\n/);
+  const zipEntries = (process.platform === 'linux'
+    ? execFileSync('unzip', ['-Z1', zipPath])
+    : execFileSync('tar', ['-tf', zipPath])).toString().trim().split(/\r?\n/);
   assert.ok(zipEntries.includes('package.json') && zipEntries.includes('LICENSE.txt') && zipEntries.includes('NOTICE.txt'));
   assert.ok(zipEntries.every(name => !/^(?:Assets|Packages|Tests|Generated|Documentation~)\//.test(name)));
   const zipDir = path.join(root, 'dist~/vpm-extracted'); fs.mkdirSync(zipDir);
-  execFileSync('tar', ['-xf', zipPath, '-C', zipDir]);
+  if (process.platform === 'linux') execFileSync('unzip', ['-qq', zipPath, '-d', zipDir]);
+  else execFileSync('tar', ['-xf', zipPath, '-C', zipDir]);
   for (const [name, bytes] of snapshot.vpmFiles) assert.deepEqual(fs.readFileSync(path.join(zipDir, name)), bytes);
   const note = fs.readFileSync(path.join(root, 'dist~/release-notes.md'), 'utf8');
   assert.ok(note.includes('Test fix.') && !note.includes('Old fix.'));

@@ -19,7 +19,7 @@ mainとPRでも検査・生成しますが、Release公開は行いません。�
 - GUIDの欠損・重複、参照先のないmeta、シンボリックリンク、版番号・日付の不整合を検出します。
 - アーカイブの所有者名と元パスを保存せず、所有者IDと時刻を0に固定します。USTARは本ツールのGUIDディレクトリと既知のファイル名だけを扱います。
 - 解凍した全データ・メタデータを元コミットと照合し、WindowsとLinuxの成果物がバイト単位で一致すること、タグが版番号に一致しmainの履歴に含まれることを公開前に確認します。
-- テストは別実装のtarでの展開、LF/CRLFのcheckoutでの同一性、混入・不完全な入力・改ざん・タグ不一致の拒否を含みます。
+- テストは別実装での展開（unitypackageはtar、VPM ZIPはWindows標準tar/Linuxのunzip）、LF/CRLFのcheckoutでの同一性、混入・不完全な入力・改ざん・タグ不一致の拒否を含みます。
 - このCIはUnityの実行テストを代替しません。製品コードの変更に必要なUnity検証は [TEST_ENVIRONMENT.md](TEST_ENVIRONMENT.md) に従います。
 
 CIの生成先は `dist~/` です。manifestと生成したRelease本文はActionsの内部成果物として保存し、公開Releaseにはunitypackage、VPM ZIP、package.jsonを添付します。VPM ZIPはルートにpackage.json・Editor・Runtime・文書とmetaを含み、テスト・生成済みアセットを含みません。必要な調査時は、変更のないコミット済みcheckoutで同じ処理を実行できます。
