@@ -95,4 +95,20 @@ onUnmounted(() => window.removeEventListener('hashchange', selectFromHash))
   outline-offset: -3px;
 }
 .method-panel { padding: 4px 20px; }
+.method-panel :deep(.vcc-add-button) {
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 6px;
+  background: var(--vp-c-brand-3);
+  color: var(--vp-c-white);
+  font-weight: 600;
+  text-decoration: none;
+}
+.method-panel :deep(.vcc-add-button:hover) {
+  background: var(--vp-c-brand-2);
+}
+.method-panel :deep(.vcc-add-button:focus-visible) {
+  outline: 2px solid var(--vp-c-brand-1);
+  outline-offset: 3px;
+}
 </style>
