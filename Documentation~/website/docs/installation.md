@@ -2,6 +2,10 @@
 description: Mururu Blink & LipSyncのインストール手順。Modular Avatarの導入、VCCまたはunitypackageからの追加、ツールのウィンドウからムルルにまばたきとリップシンクを追加するまで。
 ---
 
+<script setup>
+import InstallationMethods from './.vitepress/theme/InstallationMethods.vue'
+</script>
+
 # インストール
 
 ## 1. 前提ツールを導入する
@@ -21,23 +25,37 @@ MAとlilToonは、VCCのManage Packagesから使用するプロジェクトに�
 
 ## 2. ツールをプロジェクトへ追加する
 
-VCC版とunitypackage版のどちらか一方を使います。
+使用する配布形式のタブを選び、どちらか一方の方法で追加してください。
 
-### VCCから追加する
+VCC版とunitypackage版は併用できません。既に導入済みで配布形式を変える場合は、先に[配布形式の切り替え](#配布形式の切り替え)を確認してください。
 
-1. [unlibraの配布一覧](https://docs.unlibra.com/vpm/)の「VCCに追加」を押して、リポジトリを登録します。
+<InstallationMethods>
+<template #vcc>
+
+1. 下の「VCCに追加」を押し、VCCの確認画面でリポジトリを登録します。
+
+   <a class="vcc-add-button" href="vcc://vpm/addRepo?url=https%3A%2F%2Fdocs.unlibra.com%2Fvpm%2Findex.json">VCCに追加</a>
+
 2. VCCで使用するプロジェクトの **Manage Packages** を開き、**Mururu Blink & LipSync** を追加します。
 3. Unityでプロジェクトを開きます。
 
 リポジトリの登録だけでは、プロジェクトへツールは追加されません。
 
-既にunitypackage版を入れている場合は、先に[配布形式の切り替え](#配布形式の切り替え)を確認してください。
+ボタンが動かない場合は、VCCの **Settings > Packages > Add Repository** から、次のURLを手動で登録してください。
 
-### unitypackageから追加する
+`https://docs.unlibra.com/vpm/index.json`
 
-BOOTHまたはGitHub ReleasesからダウンロードしたunitypackageをUnityのProjectウィンドウへドラッグ＆ドロップし、すべて選択したままImportします。
+</template>
+<template #unitypackage>
+
+[BOOTH](https://unlibra.booth.pm/items/9056145)または[GitHub Releases](https://github.com/unlibra/mururu-blink-lipsync/releases)からダウンロードしたunitypackageをUnityのProjectウィンドウへドラッグ＆ドロップし、すべて選択したままImportします。
 
 ![Import Unity Package の画面](/images/1-2.webp)
+
+</template>
+</InstallationMethods>
+
+追加できたら、以下の共通手順へ進みます。
 
 ## 3. ツールのウィンドウを開く
 

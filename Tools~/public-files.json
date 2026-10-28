@@ -27,6 +27,7 @@
     "Documentation~/maintenance/test-environment-packages.json",
     "Documentation~/website/.gitignore",
     "Documentation~/website/docs/.vitepress/config.ts",
+    "Documentation~/website/docs/.vitepress/theme/InstallationMethods.vue",
     "Documentation~/website/docs/.vitepress/theme/LinkCard.vue",
     "Documentation~/website/docs/.vitepress/theme/custom.css",
     "Documentation~/website/docs/.vitepress/theme/index.ts",
