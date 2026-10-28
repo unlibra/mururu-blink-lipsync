@@ -27,6 +27,8 @@ MAとlilToonは、VCCのManage Packagesから使用するプロジェクトに�
 
 使用する配布形式のタブを選び、どちらか一方の方法で追加してください。
 
+VCC版とunitypackage版は併用できません。既に導入済みで配布形式を変える場合は、先に[配布形式の切り替え](#配布形式の切り替え)を確認してください。
+
 <InstallationMethods>
 <template #vcc>
 
@@ -42,8 +44,6 @@ MAとlilToonは、VCCのManage Packagesから使用するプロジェクトに�
 ボタンが動かない場合は、VCCの **Settings > Packages > Add Repository** から、次のURLを手動で登録してください。
 
 `https://docs.unlibra.com/vpm/index.json`
-
-既にunitypackage版を入れている場合は、先に[配布形式の切り替え](#配布形式の切り替え)を確認してください。
 
 </template>
 <template #unitypackage>

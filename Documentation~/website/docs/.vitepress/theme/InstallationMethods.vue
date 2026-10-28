@@ -98,7 +98,7 @@ onUnmounted(() => window.removeEventListener('hashchange', selectFromHash))
 .method-panel :deep(.vcc-add-button) {
   display: inline-block;
   padding: 8px 20px;
-  border-radius: 6px;
+  border-radius: 999px;
   background: var(--vp-c-brand-3);
   color: var(--vp-c-white);
   font-weight: 600;
