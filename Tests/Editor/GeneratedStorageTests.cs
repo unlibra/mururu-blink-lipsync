@@ -129,6 +129,23 @@ namespace MururuBlinkLipSync.Editor.Tests
         }
 
         [Test]
+        public void Storage_UnsavedPreviewSceneReferenceKeepsMesh()
+        {
+            var record = Install(SpawnMururu("Mururu"));
+            string meshPath = AssetDatabase.GetAssetPath(record.installedLipSyncMouthRenderer.sharedMesh);
+            var preview = UnityEditor.SceneManagement.EditorSceneManager.NewPreviewScene();
+            try
+            {
+                var other = new GameObject("Unsaved prefab/preview mesh reference").AddComponent<MeshFilter>();
+                UnityEngine.SceneManagement.SceneManager.MoveGameObjectToScene(other.gameObject, preview);
+                other.sharedMesh = record.installedLipSyncMouthRenderer.sharedMesh;
+                Assert.IsNull(Run(window.UninstallAuto));
+                Assert.IsTrue(AssetExists(meshPath));
+            }
+            finally { UnityEditor.SceneManagement.EditorSceneManager.ClosePreviewScene(preview); }
+        }
+
+        [Test]
         public void Storage_ForeignPackageMeshIsPreservedOnRemove()
         {
             var record = Install(SpawnMururu("Mururu"));

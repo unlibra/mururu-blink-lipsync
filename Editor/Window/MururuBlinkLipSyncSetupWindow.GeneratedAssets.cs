@@ -253,22 +253,21 @@ public partial class MururuBlinkLipSyncSetupWindow
 
         var livePaths = new HashSet<string>(StringComparer.Ordinal);
         Transform ownRoot = operationRecord != null ? operationRecord.transform : null;
-        for (int i = 0; i < SceneManager.sceneCount; i++)
+        // Resources also includes isolated Prefab Mode / preview scenes, which
+        // SceneManager.sceneCount does not enumerate. Their unsaved refs count.
+        foreach (var component in Resources.FindObjectsOfTypeAll<Component>())
         {
-            Scene scene = SceneManager.GetSceneAt(i);
-            if (!scene.isLoaded) continue;
-            foreach (var component in scene.GetRootGameObjects().SelectMany(root => root.GetComponentsInChildren<Component>(true)))
+            if (component == null || EditorUtility.IsPersistent(component) ||
+                !component.gameObject.scene.IsValid() || !component.gameObject.scene.isLoaded ||
+                ownRoot != null && (component.transform == ownRoot || component.transform.IsChildOf(ownRoot))) continue;
+            using (var serialized = new SerializedObject(component))
             {
-                if (component == null || ownRoot != null && (component.transform == ownRoot || component.transform.IsChildOf(ownRoot))) continue;
-                using (var serialized = new SerializedObject(component))
+                var property = serialized.GetIterator();
+                while (property.Next(true))
                 {
-                    var property = serialized.GetIterator();
-                    while (property.Next(true))
-                    {
-                        if (property.propertyType != SerializedPropertyType.ObjectReference || property.objectReferenceValue == null) continue;
-                        string assetPath = AssetDatabase.GetAssetPath(property.objectReferenceValue);
-                        if (!string.IsNullOrEmpty(assetPath)) livePaths.Add(assetPath);
-                    }
+                    if (property.propertyType != SerializedPropertyType.ObjectReference || property.objectReferenceValue == null) continue;
+                    string assetPath = AssetDatabase.GetAssetPath(property.objectReferenceValue);
+                    if (!string.IsNullOrEmpty(assetPath)) livePaths.Add(assetPath);
                 }
             }
         }
