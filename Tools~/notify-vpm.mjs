@@ -40,13 +40,13 @@ export async function notifyVpm(tag, token, { fetcher = fetch, sleep = ms => new
     const run = await request(fetcher, `${api}/actions/runs/${runId}`, { headers: auth });
     requireThat(run.id === runId && run.head_branch === 'main' && run.event === 'workflow_dispatch' && run.path === '.github/workflows/sync.yml', 'Unexpected VPM workflow run.');
     if (run.status === 'completed') {
+      requireThat(['success', 'cancelled'].includes(run.conclusion), `VPM listing update failed. Retry the notification job after checking ${runUrl}`);
       const index = await request(fetcher, listingUrl, { headers: { Accept: 'application/json', 'Cache-Control': 'no-cache' } });
       requireThat(index.id === 'com.unlibra.vpm' && index.url === listingUrl, 'Unexpected public VPM listing.');
       const version = index.packages?.[packageId]?.versions?.[tag.slice(1)];
       if (version?.name === packageId && version.version === tag.slice(1) && /^[0-9a-f]{64}$/.test(version.zipSHA256) &&
           version.url === `https://github.com/unlibra/mururu-blink-lipsync/releases/download/${tag}/${packageId}-${tag.slice(1)}.zip`) return runUrl;
       // A newer queued sync may supersede this run. It imports the whole backlog.
-      requireThat(['success', 'cancelled'].includes(run.conclusion), `VPM listing update failed. Retry the notification job after checking ${runUrl}`);
     }
     await sleep(10000);
   }

@@ -52,3 +52,7 @@ test('superseded runs and Pages propagation are accepted only after the expected
   assert.equal(pages, 2);
   assert.equal(result, 'https://github.com/unlibra/vpm/actions/runs/42');
 });
+
+test('an already published version cannot hide a failed verification run', async () => {
+  await assert.rejects(notifyVpm('v1.2.0', fixtureValue, { fetcher: async (url, options) => json(options.method === 'POST' ? { workflow_run_id: 42 } : url.includes('api.github.com') ? { ...run, conclusion: 'failure' } : published) }), /update failed/);
+});
