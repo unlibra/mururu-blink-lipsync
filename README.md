@@ -5,6 +5,7 @@
 ## ダウンロード・使い方
 
 - [BOOTH](https://unlibra.booth.pm/items/9056145) / [GitHub Releases](https://github.com/unlibra/mururu-blink-lipsync/releases)：配布用のunitypackage
+- [VCC配布一覧](https://docs.unlibra.com/vpm/)：登録後、使用するプロジェクトのManage Packagesから追加
 - [マニュアル](https://docs.unlibra.com/mururu-blink-lipsync/)：導入・設定・更新・削除の手順
 - [変更履歴](CHANGELOG.md)
 

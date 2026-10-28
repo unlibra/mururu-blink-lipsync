@@ -5,6 +5,7 @@ import { gzipSync, gunzipSync } from 'node:zlib';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { PACKAGE_ID, validateManifest, zipBytes, verifyVpm } from './vpm.mjs';
 
 const prefix = 'Assets/unlibra/MururuBlinkLipSync';
 const parentFolders = [
@@ -76,7 +77,19 @@ export function releaseSnapshot(root) {
     requireThat(isFile || /^folderAsset: yes\s*$/m.test(meta.toString()), `Missing folder metadata: ${name}`);
     addAsset(`${prefix}/${name}`, guidMatches[0][1], meta, isFile ? read(name) : undefined);
   }
-  return { commit, version, releaseDate, releaseNotes, assetCount: assets.size, entries };
+  const packageJson = read('package.json');
+  validateManifest(packageJson, version);
+  const vpmFiles = new Map([['package.json', packageJson]]);
+  for (const [name, entry] of entries) {
+    if (!name.endsWith('/pathname')) continue;
+    const assetPath = entry.bytes.toString();
+    if (!assetPath.startsWith(prefix + '/')) continue;
+    const relative = assetPath.slice(prefix.length + 1), guid = name.split('/')[0];
+    vpmFiles.set(relative + '.meta', entries.get(guid + '/asset.meta').bytes);
+    const asset = entries.get(guid + '/asset');
+    if (asset) vpmFiles.set(relative, asset.bytes);
+  }
+  return { commit, version, releaseDate, releaseNotes, assetCount: assets.size, entries, vpmFiles, packageJson };
 }
 
 // A bounded USTAR writer: only our GUID directories and three regular entry names.
@@ -112,11 +125,15 @@ export function verifyPackage(packageBytes, entries) {
   requireThat(actual.equals(expected), 'Package content or archive metadata mismatch.');
 }
 
-function metadata(snapshot, bytes) {
+function metadata(snapshot, bytes, vpm) {
   return {
     version: snapshot.version, releaseDate: snapshot.releaseDate,
     sourceCommit: snapshot.commit, sourceDirty: false, packageAssetCount: snapshot.assetCount,
-    files: [{ name: `MururuBlinkLipSync_v${snapshot.version}.unitypackage`, bytes: bytes.length, sha256: hash(bytes) }],
+    files: [
+      { name: `MururuBlinkLipSync_v${snapshot.version}.unitypackage`, bytes: bytes.length, sha256: hash(bytes) },
+      { name: `${PACKAGE_ID}-${snapshot.version}.zip`, bytes: vpm.length, sha256: hash(vpm) },
+      { name: 'package.json', bytes: snapshot.packageJson.length, sha256: hash(snapshot.packageJson) },
+    ],
   };
 }
 
@@ -131,13 +148,17 @@ export function buildRelease(root) {
   // zlib otherwise writes the host OS here (Windows=10, Unix=3).
   bytes[9] = 255;
   verifyPackage(bytes, snapshot.entries);
-  const manifest = metadata(snapshot, bytes);
+  const vpm = zipBytes(snapshot.vpmFiles);
+  verifyVpm(vpm, snapshot.vpmFiles);
+  const manifest = metadata(snapshot, bytes, vpm);
   const dist = path.join(root, 'dist~');
   const distStat = fs.lstatSync(dist, { throwIfNoEntry: false });
   requireThat(distStat === undefined || distStat.isDirectory() && !distStat.isSymbolicLink(), 'Invalid release output directory.');
   fs.mkdirSync(dist, { recursive: true });
   for (const [name, data] of [
     [manifest.files[0].name, bytes],
+    [manifest.files[1].name, vpm],
+    ['package.json', snapshot.packageJson],
     ['release-manifest.json', JSON.stringify(manifest, null, 2) + '\n'],
     ['release-notes.md', notes(snapshot, manifest.files[0].sha256)],
   ]) {
@@ -157,16 +178,19 @@ export function verifyBuilds(root, directories, tag, commit) {
   let firstPackage;
   for (const directory of directories) {
     const name = `MururuBlinkLipSync_v${snapshot.version}.unitypackage`;
-    requireThat(JSON.stringify(fs.readdirSync(directory).sort()) === JSON.stringify([name, 'release-manifest.json', 'release-notes.md'].sort()), 'Unexpected release artifact files.');
+    requireThat(JSON.stringify(fs.readdirSync(directory).sort()) === JSON.stringify([name, `${PACKAGE_ID}-${snapshot.version}.zip`, 'package.json', 'release-manifest.json', 'release-notes.md'].sort()), 'Unexpected release artifact files.');
     const bytes = fs.readFileSync(path.join(directory, name));
     verifyPackage(bytes, snapshot.entries);
+    const vpm = fs.readFileSync(path.join(directory, `${PACKAGE_ID}-${snapshot.version}.zip`));
+    verifyVpm(vpm, snapshot.vpmFiles);
+    requireThat(fs.readFileSync(path.join(directory, 'package.json')).equals(snapshot.packageJson), 'VPM package.json mismatch.');
     const manifest = JSON.parse(fs.readFileSync(path.join(directory, 'release-manifest.json')));
-    requireThat(JSON.stringify(manifest) === JSON.stringify(metadata(snapshot, bytes)), 'Release manifest mismatch.');
+    requireThat(JSON.stringify(manifest) === JSON.stringify(metadata(snapshot, bytes, vpm)), 'Release manifest mismatch.');
     requireThat(fs.readFileSync(path.join(directory, 'release-notes.md'), 'utf8') === notes(snapshot, hash(bytes)), 'Release notes mismatch.');
     requireThat(firstPackage === undefined || firstPackage.equals(bytes), 'Linux and Windows packages differ.');
     firstPackage = bytes;
   }
-  return { packagePath: path.resolve(directories[0], `MururuBlinkLipSync_v${snapshot.version}.unitypackage`), notesPath: path.resolve(directories[0], 'release-notes.md') };
+  return { packagePath: path.resolve(directories[0], `MururuBlinkLipSync_v${snapshot.version}.unitypackage`), notesPath: path.resolve(directories[0], 'release-notes.md'), vpmPath: path.resolve(directories[0], `${PACKAGE_ID}-${snapshot.version}.zip`), manifestPath: path.resolve(directories[0], 'package.json') };
 }
 
 function main(args) {
@@ -175,7 +199,7 @@ function main(args) {
     console.log(JSON.stringify(buildRelease(root), null, 2));
   } else if (args.length === 5 && args[0] === 'verify') {
     const result = verifyBuilds(root, [args[1], args[2]], args[3], args[4]);
-    if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, `package_path=${result.packagePath}\nnotes_path=${result.notesPath}\n`);
+    if (process.env.GITHUB_OUTPUT) fs.appendFileSync(process.env.GITHUB_OUTPUT, `package_path=${result.packagePath}\nnotes_path=${result.notesPath}\nvpm_path=${result.vpmPath}\nmanifest_path=${result.manifestPath}\n`);
     console.log('Release artifacts verified against committed sources on both platforms.');
   } else throw new Error('Usage: node Tools~/release.mjs build | verify LINUX_DIR WINDOWS_DIR TAG COMMIT');
 }

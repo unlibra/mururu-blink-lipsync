@@ -70,7 +70,7 @@ public partial class MururuBlinkLipSyncSetupWindow
 
         // Created only after every check above, so a refused Apply leaves no
         // empty Generated folder behind.
-        EnsureFolder(OutputFolder);
+        PrepareStorageForWrite(record);
 
         string controllerPath =
             AssetDatabase.GenerateUniqueAssetPath(
@@ -191,6 +191,9 @@ public partial class MururuBlinkLipSyncSetupWindow
         {
             // Resolve the package layout up front so a duplicated or misplaced
             // package aborts before anything is modified.
+            operationCreatedAssetGuids.Clear();
+            operationOutputFolder = null;
+            operationAssetSet = null;
             operationPackageRoot = GetPackageRoot();
 
             action();
@@ -204,6 +207,7 @@ public partial class MururuBlinkLipSyncSetupWindow
             // reverted, and the user's own edits were flushed before it.
             Undo.FlushUndoRecordObjects();
             Undo.RevertAllDownToGroup(undoGroup);
+            RollbackCreatedAssets();
 
             return ex;
         }
@@ -221,11 +225,16 @@ public partial class MururuBlinkLipSyncSetupWindow
             // way through an operation does not leave a half-applied install.
             Undo.FlushUndoRecordObjects();
             Undo.RevertAllDownToGroup(undoGroup);
+            RollbackCreatedAssets();
 
             return ex;
         }
         finally
         {
+            operationCreatedAssetGuids.Clear();
+            operationOutputFolder = null;
+            operationAssetSet = null;
+            operationRecord = null;
             operationPackageRoot = null;
             externallyReferencedGeneratedPaths = null;
 
@@ -234,6 +243,15 @@ public partial class MururuBlinkLipSyncSetupWindow
             Undo.FlushUndoRecordObjects();
             Undo.SetCurrentGroupName("Mururu Blink & LipSync");
             Undo.CollapseUndoOperations(undoGroup);
+        }
+    }
+
+    private static void RollbackCreatedAssets()
+    {
+        foreach (string guid in operationCreatedAssetGuids.AsEnumerable().Reverse())
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            if (!string.IsNullOrEmpty(path)) AssetDatabase.DeleteAsset(path);
         }
     }
 
@@ -331,7 +349,7 @@ public partial class MururuBlinkLipSyncSetupWindow
 
             // Created only after every confirmation dialog, so cancelling
             // leaves no empty Generated folder behind.
-            EnsureFolder(OutputFolder);
+            PrepareStorageForWrite(null);
 
             root = CreateRoot();
 
@@ -345,6 +363,7 @@ public partial class MururuBlinkLipSyncSetupWindow
                     $"推奨配置: {GetPackageRoot()}/Runtime/MururuBlinkLipSyncInstallRecord.cs");
             }
 
+            record.generatedAssetSet = operationAssetSet;
             CaptureOriginalState(record, sourceBody);
             record.installedVersion = ToolVersion;
             record.installSchemaVersion = InstallSchemaVersion;
@@ -541,7 +560,7 @@ public partial class MururuBlinkLipSyncSetupWindow
                     sourceBody,
                     out int[] neutralTriangles);
 
-            EnsureFolder(OutputFolder);
+            PrepareStorageForWrite(record);
 
             Mesh generatedSe =
                 GenerateLipSyncMouth(

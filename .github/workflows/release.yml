@@ -32,7 +32,7 @@ jobs:
           node-version: 24
       - name: Test and inspect publication
         run: |
-          node --test Tools~/privacy.test.mjs Tools~/website.test.mjs Tools~/release.test.mjs
+          node --test Tools~/privacy.test.mjs Tools~/website.test.mjs Tools~/release.test.mjs Tools~/vpm.test.mjs Tools~/notify-vpm.test.mjs
           node Tools~/privacy.mjs check-commit HEAD
       - name: Build committed release
         run: node Tools~/release.mjs build
@@ -41,6 +41,8 @@ jobs:
           name: release-${{ matrix.os }}
           path: |
             dist~/*.unitypackage
+            dist~/*.zip
+            dist~/package.json
             dist~/release-manifest.json
             dist~/release-notes.md
           if-no-files-found: error
@@ -75,12 +77,56 @@ jobs:
           test "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" = "$SOURCE_COMMIT"
           git merge-base --is-ancestor "$SOURCE_COMMIT" origin/main
           node Tools~/release.mjs verify dist~/ci/release-ubuntu-latest dist~/ci/release-windows-latest "$RELEASE_TAG" "$SOURCE_COMMIT"
-      - name: Publish the verified unitypackage
+      - name: Generate VPM notification token
+        id: vpm-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.VPM_APP_CLIENT_ID }}
+          private-key: ${{ secrets.VPM_APP_PRIVATE_KEY }}
+          owner: unlibra
+          repositories: vpm
+          permission-actions: write
+      - name: Check VPM automation before publishing
+        env:
+          VPM_DISPATCH_TOKEN: ${{ steps.vpm-token.outputs.token }}
+        run: node Tools~/notify-vpm.mjs check
+      - name: Publish the verified unitypackage and VPM package
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.ref_name }}
           PACKAGE_PATH: ${{ steps.verify.outputs.package_path }}
           NOTES_PATH: ${{ steps.verify.outputs.notes_path }}
+          VPM_PATH: ${{ steps.verify.outputs.vpm_path }}
+          MANIFEST_PATH: ${{ steps.verify.outputs.manifest_path }}
         run: |
-          gh release create "$RELEASE_TAG" "$PACKAGE_PATH" --verify-tag --title "$RELEASE_TAG" --notes-file "$NOTES_PATH"
+          gh release create "$RELEASE_TAG" "$PACKAGE_PATH" "$VPM_PATH" "$MANIFEST_PATH" --verify-tag --title "$RELEASE_TAG" --notes-file "$NOTES_PATH"
+
+  notify-vpm:
+    if: github.event_name == 'push' && github.ref_type == 'tag' && github.repository == 'unlibra/mururu-blink-lipsync'
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Generate VPM notification token
+        id: vpm-token
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        with:
+          client-id: ${{ vars.VPM_APP_CLIENT_ID }}
+          private-key: ${{ secrets.VPM_APP_PRIVATE_KEY }}
+          owner: unlibra
+          repositories: vpm
+          permission-actions: write
+      - name: Update VPM listing and wait for publication
+        env:
+          VPM_DISPATCH_TOKEN: ${{ steps.vpm-token.outputs.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node Tools~/notify-vpm.mjs notify "$RELEASE_TAG"

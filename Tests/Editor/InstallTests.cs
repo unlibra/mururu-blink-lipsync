@@ -27,7 +27,7 @@ namespace MururuBlinkLipSync.Editor.Tests
         {
             MururuBlinkLipSyncInstallRecord record = Install(SpawnMururu("Mururu"));
 
-            string prefix = MururuBlinkLipSyncSetupWindow.OutputFolder + "/";
+            string prefix = MururuGeneratedStorage.Folder((MururuGeneratedAssetSet)record.generatedAssetSet) + "/";
 
             AssertGenerated(
                 AssetDatabase.GetAssetPath(record.installedLipSyncMouthRenderer.sharedMesh),

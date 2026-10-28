@@ -29,6 +29,8 @@ namespace MururuBlinkLipSync.Editor.Tests
         private readonly HashSet<string> generatedPaths =
             new HashSet<string>(StringComparer.Ordinal);
 
+        private readonly HashSet<string> generatedSetGuids = new HashSet<string>();
+
         private string bodyFbxPath;
 
         private bool bodyFbxReadable;
@@ -90,6 +92,17 @@ namespace MururuBlinkLipSync.Editor.Tests
                     AssetDatabase.DeleteAsset(path);
             }
 
+            foreach (string guid in generatedSetGuids)
+            {
+                string manifest = AssetDatabase.GUIDToAssetPath(guid);
+                if (string.IsNullOrEmpty(manifest)) continue;
+                string folder = Path.GetDirectoryName(manifest).Replace('\\', '/');
+                // Only this fixture's manifests and empty directories are removed.
+                AssetDatabase.DeleteAsset(manifest);
+                if (Directory.Exists(folder) && !Directory.EnumerateFileSystemEntries(folder).Any())
+                    AssetDatabase.DeleteAsset(folder);
+            }
+            generatedSetGuids.Clear();
             generatedPaths.Clear();
 
             ModelImporter importer = BodyImporter;
@@ -258,6 +271,9 @@ namespace MururuBlinkLipSync.Editor.Tests
         {
             if (record == null || record.generatedAssetPaths == null)
                 return;
+
+            if (record.generatedAssetSet != null)
+                generatedSetGuids.Add(AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(record.generatedAssetSet)));
 
             foreach (string path in record.generatedAssetPaths)
             {

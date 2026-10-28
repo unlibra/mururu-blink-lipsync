@@ -71,10 +71,11 @@ public partial class MururuBlinkLipSyncSetupWindow
             packageRoot.Replace('\\', '/');
 
         if (!(packageRoot == "Assets" ||
-              packageRoot.StartsWith("Assets/", StringComparison.Ordinal)))
+              packageRoot.StartsWith("Assets/", StringComparison.Ordinal) ||
+              packageRoot.StartsWith("Packages/", StringComparison.Ordinal)))
         {
             throw new Exception(
-                "MururuBlinkLipSyncはAssets配下へ配置してください。\n" +
+                "MururuBlinkLipSyncの配置を確認してください。\n" +
                 $"現在のパッケージルート: {packageRoot}");
         }
 
@@ -233,15 +234,16 @@ public partial class MururuBlinkLipSyncSetupWindow
         if (prefabStage != null && !string.IsNullOrEmpty(prefabStage.assetPath))
             inMemoryContainerPaths.Add(prefabStage.assetPath.Replace('\\', '/'));
 
-        string[] containerPaths =
-            AssetDatabase.FindAssets("t:Scene", new[] { "Assets" })
-                .Concat(AssetDatabase.FindAssets("t:Prefab", new[] { "Assets" }))
-                .Distinct()
-                .Select(guid => AssetDatabase.GUIDToAssetPath(guid).Replace('\\', '/'))
-                .Where(path =>
-                    !string.IsNullOrEmpty(path) &&
-                    !inMemoryContainerPaths.Contains(path))
-                .ToArray();
+        var ownedPaths = new HashSet<string>(operationAssetSet != null
+            ? operationAssetSet.assets.Where(asset => asset != null).Select(AssetDatabase.GetAssetPath)
+            : Enumerable.Empty<string>(), StringComparer.Ordinal);
+        string[] containerPaths = AssetDatabase.GetAllAssetPaths()
+            .Where(path => path.StartsWith("Assets/", StringComparison.Ordinal) &&
+                !AssetDatabase.IsValidFolder(path) && !inMemoryContainerPaths.Contains(path) &&
+                !ownedPaths.Contains(path) &&
+                AssetDatabase.GetMainAssetTypeAtPath(path) != typeof(MururuGeneratedAssetSet) &&
+                AssetDatabase.GetMainAssetTypeAtPath(path) != typeof(MururuGeneratedRoot))
+            .ToArray();
 
         HashSet<string> result =
             new HashSet<string>(StringComparer.Ordinal);
@@ -249,6 +251,27 @@ public partial class MururuBlinkLipSyncSetupWindow
         Queue<string> pending =
             new Queue<string>();
 
+        var livePaths = new HashSet<string>(StringComparer.Ordinal);
+        Transform ownRoot = operationRecord != null ? operationRecord.transform : null;
+        // Resources also includes isolated Prefab Mode / preview scenes, which
+        // SceneManager.sceneCount does not enumerate. Their unsaved refs count.
+        foreach (var component in Resources.FindObjectsOfTypeAll<Component>())
+        {
+            if (component == null || EditorUtility.IsPersistent(component) ||
+                !component.gameObject.scene.IsValid() || !component.gameObject.scene.isLoaded ||
+                ownRoot != null && (component.transform == ownRoot || component.transform.IsChildOf(ownRoot))) continue;
+            using (var serialized = new SerializedObject(component))
+            {
+                var property = serialized.GetIterator();
+                while (property.Next(true))
+                {
+                    if (property.propertyType != SerializedPropertyType.ObjectReference || property.objectReferenceValue == null) continue;
+                    string assetPath = AssetDatabase.GetAssetPath(property.objectReferenceValue);
+                    if (!string.IsNullOrEmpty(assetPath)) livePaths.Add(assetPath);
+                }
+            }
+        }
+        containerPaths = containerPaths.Concat(livePaths).Distinct().ToArray();
         if (containerPaths.Length > 0)
         {
             foreach (string dependency in
@@ -263,6 +286,9 @@ public partial class MururuBlinkLipSyncSetupWindow
                 }
             }
         }
+
+        foreach (string path in livePaths)
+            if (path.StartsWith(outputPrefix, StringComparison.Ordinal) && result.Add(path)) pending.Enqueue(path);
 
         // A kept controller or menu must keep the generated clips / submenus it
         // points at, so follow references between generated assets as well.
@@ -294,7 +320,8 @@ public partial class MururuBlinkLipSyncSetupWindow
             return false;
         }
 
-        if (AssetPathEquals(record.installedController, normalizedPath) ||
+        if (AssetPathEquals(record.generatedAssetSet, normalizedPath) ||
+            AssetPathEquals(record.installedController, normalizedPath) ||
             AssetPathEquals(record.installedOnClip, normalizedPath) ||
             AssetPathEquals(record.installedOffClip, normalizedPath))
         {
@@ -453,12 +480,13 @@ public partial class MururuBlinkLipSyncSetupWindow
         if (normalized.Split('/').Any(segment => segment == "." || segment == ".."))
             return false;
 
-        string outputFolder =
-            OutputFolder.TrimEnd('/');
+        if (operationAssetSet == null) return false;
+        string outputFolder = MururuGeneratedStorage.Folder(operationAssetSet).TrimEnd('/');
+        if (!normalized.StartsWith(outputFolder + "/", StringComparison.Ordinal)) return false;
+        MururuGeneratedStorage.ValidateWritablePath(normalized);
 
-        return normalized.StartsWith(
-            outputFolder + "/",
-            StringComparison.Ordinal);
+        return normalized.StartsWith(outputFolder + "/", StringComparison.Ordinal) &&
+            operationAssetSet.assets.Any(asset => asset != null && AssetPathEquals(asset, normalized));
     }
 
     private static void RefreshTrackedAssetPaths(
@@ -467,6 +495,7 @@ public partial class MururuBlinkLipSyncSetupWindow
         if (record == null)
             return;
 
+        UseRecordStorage(record);
         if (record.generatedAssetPaths == null)
         {
             record.generatedAssetPaths =
@@ -531,9 +560,18 @@ public partial class MururuBlinkLipSyncSetupWindow
                 new List<string>();
         }
 
-        path =
-            path.Replace('\\', '/');
-
+        path = path.Replace('\\', '/');
+        if (operationAssetSet == null || !path.StartsWith(MururuGeneratedStorage.Folder(operationAssetSet) + "/", StringComparison.Ordinal))
+            throw new InvalidOperationException("生成したアセットが専用の保存領域外です。");
+        var asset = AssetDatabase.LoadMainAssetAtPath(path);
+        if (asset == null) throw new InvalidOperationException("生成したアセットを読み取れません。");
+        if (!operationAssetSet.assets.Contains(asset))
+        {
+            Undo.RecordObject(operationAssetSet, "Mururu Blink & LipSync - Track Asset");
+            operationAssetSet.assets.Add(asset);
+            EditorUtility.SetDirty(operationAssetSet);
+            operationCreatedAssetGuids.Add(AssetDatabase.AssetPathToGUID(path));
+        }
         if (!record.generatedAssetPaths.Contains(path))
         {
             record.generatedAssetPaths.Add(path);

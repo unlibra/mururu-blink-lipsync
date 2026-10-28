@@ -1,0 +1,21 @@
+{
+  "name": "com.unlibra.mururu-blink-lipsync",
+  "displayName": "Mururu Blink & LipSync",
+  "version": "1.2.0",
+  "unity": "2022.3",
+  "description": "ムルル向けのまばたき・リップシンク導入ツール。",
+  "author": {
+    "name": "unlibra",
+    "email": "63234154+unlibra@users.noreply.github.com",
+    "url": "https://unlibra.com"
+  },
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "documentationUrl": "https://docs.unlibra.com/mururu-blink-lipsync/",
+  "changelogUrl": "https://github.com/unlibra/mururu-blink-lipsync/blob/main/CHANGELOG.md",
+  "url": "https://github.com/unlibra/mururu-blink-lipsync/releases/download/v1.2.0/com.unlibra.mururu-blink-lipsync-1.2.0.zip",
+  "vpmDependencies": {
+    "com.vrchat.avatars": ">=3.10.5 <4.0.0",
+    "nadena.dev.modular-avatar": ">=1.18.7 <2.0.0",
+    "nadena.dev.ndmf": ">=1.14.8 <2.0.0"
+  }
+}
