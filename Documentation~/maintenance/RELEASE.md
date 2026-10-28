@@ -35,7 +35,7 @@ Package IDは com.unlibra.mururu-blink-lipsync。package.json・ToolVersion・CH
 
 共通一覧は [unlibra/vpm](https://github.com/unlibra/vpm) で管理します。Release公開後、notify-vpmジョブが共通一覧の更新を起動し、配信の完了を待ちます。vpm側は公開済みZIPとpackage.jsonを検証して新しい版を記録し、Pagesへ配信します。通知の再試行はnotify-vpmジョブだけを再実行します。既存Releaseを作り直しません。
 
-初回の設定は [vpmリポジトリの手順](https://github.com/unlibra/vpm#自動更新の初期設定) に従います。製品リポジトリのActions Secret VPM_DISPATCH_TOKENに、unlibra/vpmだけを対象とするActions read/write権限の認証を登録します。認証にはvpmへのContents write権限は不要です。メタデータのコミットと配信はvpm自身のGITHUB_TOKENで行います。
+初回の設定は [vpmリポジトリの手順](https://github.com/unlibra/vpm#自動更新の初期設定) に従います。通知専用のGitHub Appをunlibra/vpmだけにインストールし、Actions read/write権限を付けます。製品リポジトリのActions変数VPM_APP_CLIENT_IDにClient ID、Secret VPM_APP_PRIVATE_KEYに秘密鍵を登録します。各ジョブでGitHub公式のactions/create-github-app-tokenを使い、対象をvpm、権限をActions writeに限定した短期トークンを生成します。トークンはジョブ間で共有せず、ジョブ終了時に失効します。AppにはvpmへのContents write権限は不要です。メタデータのコミットと配信はvpm自身のGITHUB_TOKENで行います。
 
 Release公開前に通知先のworkflowと配信URLを確認します。vpmのmain・Pages・初期一覧を先に公開してください。VPM版の公開後は旧版ZIP・一覧エントリを削除しません。
 

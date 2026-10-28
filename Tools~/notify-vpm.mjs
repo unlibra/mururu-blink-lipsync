@@ -10,7 +10,7 @@ const packageId = 'com.unlibra.mururu-blink-lipsync';
 const requireThat = (value, message) => { if (!value) throw Error(message); };
 
 function headers(token) {
-  requireThat(typeof token === 'string' && token.trim().length > 0, 'VPM_DISPATCH_TOKEN is required; configure a token limited to unlibra/vpm Actions write.');
+  requireThat(typeof token === 'string' && token.trim().length > 0, 'VPM_DISPATCH_TOKEN is required; generate a GitHub App token scoped to unlibra/vpm Actions write.');
   return { Accept: 'application/vnd.github+json', Authorization: `Bearer ${token}`, 'X-GitHub-Api-Version': '2026-03-10' };
 }
 async function request(fetcher, url, options) {
