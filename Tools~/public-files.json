@@ -178,6 +178,8 @@
     "Tests/Editor/SpeechNotesTests.cs.meta",
     "Tests/Editor/TargetSelectionTests.cs",
     "Tests/Editor/TargetSelectionTests.cs.meta",
+    "Tools~/notify-vpm.mjs",
+    "Tools~/notify-vpm.test.mjs",
     "Tools~/privacy.mjs",
     "Tools~/privacy.test.mjs",
     "Tools~/public-files.json",
