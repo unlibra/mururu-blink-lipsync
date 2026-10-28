@@ -2,6 +2,10 @@
 description: Mururu Blink & LipSyncのインストール手順。Modular Avatarの導入、VCCまたはunitypackageからの追加、ツールのウィンドウからムルルにまばたきとリップシンクを追加するまで。
 ---
 
+<script setup>
+import InstallationMethods from './.vitepress/theme/InstallationMethods.vue'
+</script>
+
 # インストール
 
 ## 1. 前提ツールを導入する
@@ -21,9 +25,11 @@ MAとlilToonは、VCCのManage Packagesから使用するプロジェクトに�
 
 ## 2. ツールをプロジェクトへ追加する
 
-VCC版とunitypackage版のどちらか一方を使います。
+使用する配布形式のタブを選び、どちらか一方の方法で追加してください。
 
-### VCCから追加する
+<InstallationMethods>
+<template #vcc>
+
 
 1. [unlibraの配布一覧](https://docs.unlibra.com/vpm/)の「VCCに追加」を押して、リポジトリを登録します。
 2. VCCで使用するプロジェクトの **Manage Packages** を開き、**Mururu Blink & LipSync** を追加します。
@@ -33,11 +39,18 @@ VCC版とunitypackage版のどちらか一方を使います。
 
 既にunitypackage版を入れている場合は、先に[配布形式の切り替え](#配布形式の切り替え)を確認してください。
 
-### unitypackageから追加する
+</template>
+<template #unitypackage>
+
 
 BOOTHまたはGitHub ReleasesからダウンロードしたunitypackageをUnityのProjectウィンドウへドラッグ＆ドロップし、すべて選択したままImportします。
 
 ![Import Unity Package の画面](/images/1-2.webp)
+
+</template>
+</InstallationMethods>
+
+追加できたら、以下の共通手順へ進みます。
 
 ## 3. ツールのウィンドウを開く
 
