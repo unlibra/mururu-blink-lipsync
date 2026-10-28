@@ -447,7 +447,7 @@ public partial class MururuBlinkLipSyncSetupWindow
         if (shared)
         {
             Debug.Log(
-                "[MururuBlinkLipSync] Generated asset kept because another avatar, scene or prefab still uses it: " +
+                "[MururuBlinkLipSync] ほかのアバター・Scene・Prefabから参照されているため、次の生成ファイルを保持しました: " +
                 normalized);
             return;
         }
@@ -458,7 +458,7 @@ public partial class MururuBlinkLipSyncSetupWindow
         if (!AssetDatabase.DeleteAsset(normalized))
         {
             Debug.LogWarning(
-                "[MururuBlinkLipSync] Generated asset could not be deleted: " +
+                "[MururuBlinkLipSync] 生成ファイルを削除できませんでした。ファイルの使用状態や書き込み権限を確認してください: " +
                 normalized);
         }
     }
