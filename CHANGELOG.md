@@ -1,7 +1,5 @@
 # Changelog
 
-主な変更点を記録します。形式は [Keep a Changelog](https://keepachangelog.com/ja/1.1.0/) を参考にしています。
-
 ## [Unreleased]
 
 ## [1.2.0] - 2026-10-28
