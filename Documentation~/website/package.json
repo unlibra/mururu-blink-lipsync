@@ -11,6 +11,6 @@
   "devDependencies": {
     "@fontsource-variable/geist-mono": "5.3.0",
     "@fontsource-variable/noto-sans-jp": "5.3.1",
-    "vitepress": "2.0.0-alpha.20"
+    "vitepress": "2.0.0-alpha.21"
   }
 }
