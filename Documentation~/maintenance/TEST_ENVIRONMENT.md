@@ -2,7 +2,9 @@
 
 ## 場所と保持対象
 
-テスト用Unityプロジェクトは製品リポジトリの外に用意します。`Run-Tests.ps1` は、既定で隣の `../mururu-blink-lipsync-tests/` を参照します。継続利用する検証環境はGit worktreeや一時ファイルとして削除しないでください。
+テスト用Unityプロジェクトは継続利用する非公開の検証環境として、製品リポジトリの外に保持します。Git worktreeや一時ファイルとして削除したり、製品リポジトリへ移動・コピーしたりしないでください。
+
+`Run-Tests.ps1` は、既定で隣の `../mururu-blink-lipsync-tests/` を参照します。実際の配置が異なる場合は、`-ProjectPath` で検証環境のパスを明示します。
 
 有料アバターと検証用アセットは各自で用意し、Git・公開サイト・配布パッケージへ入れません。
 
@@ -29,7 +31,7 @@ Unity CLIと指定版のUnity Editorを用意し、専用プロジェクトをEd
 ./Documentation~/Run-Tests.ps1
 ```
 
-別の配置へ移動した場合は `-ProjectPath <Unityプロジェクトのパス>` を明示します。プロジェクトの識別ファイル `.mbls-test-project` が必要です。
+既定と異なる配置の場合は `-ProjectPath <Unityプロジェクトのパス>` を明示します。プロジェクトの識別ファイル `.mbls-test-project` が必要です。
 
 スクリプトはUnity・パッケージの版と必要な実データを確認し、製品・全テストを同期してUnity CLIでEditModeテストを実行します。実行前後に原本とコピーのhashを比較します。古い余剰ファイルは自動削除せず停止します。
 
